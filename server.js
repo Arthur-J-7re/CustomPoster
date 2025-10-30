@@ -64,6 +64,7 @@ const addPosterLink = (username, film, link) => {
 
 // --- Route d'upload ---
 app.post("/upload", upload.single("poster"), (req, res) => {
+  console.log("🟡 Requête reçue sur /upload :", req.file, req.body);
   if (!req.file) return res.status(400).json({ error: "Aucun fichier reçu" });
   if (!req.body.film) return res.status(400).json({ error: "Aucun nom de film reçu" });
   if (!req.body.username) return res.status(400).json({ error: "Aucun nom d'utilisateur reçu" });
@@ -109,6 +110,7 @@ app.get("/:username", (req, res) => {
 
 // --- Route de suppression ---
 app.post("/delete", (req, res) => {
+  console.log("🟡 Requête reçue sur /delete :", req.body);
   const { username, film } = req.body;
   if (!username || !film) {
     return res.status(400).json({ error: "Nom d'utilisateur ou nom de film manquant" });
