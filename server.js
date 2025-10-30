@@ -5,7 +5,6 @@ import dotenv from "dotenv";
 import cors from "cors";
 import streamifier from "streamifier";
 import fs from "fs";
-import poster from "./poster.json" assert { type: "json" };
 
 dotenv.config();
 
@@ -15,6 +14,24 @@ const upload = multer({ storage: multer.memoryStorage() });
 app.use(cors());
 app.use(express.json());
 
+const POSTER_FILE = "./poster.json";
+
+// --- Lecture initiale du fichier JSON ---
+let poster = {};
+try {
+  if (fs.existsSync(POSTER_FILE)) {
+    const data = fs.readFileSync(POSTER_FILE, "utf-8");
+    poster = JSON.parse(data);
+    console.log("✅ Fichier poster.json chargé avec succès");
+  } else {
+    console.log("⚠️ Aucun fichier poster.json trouvé, un nouveau sera créé.");
+    poster = {};
+  }
+} catch (err) {
+  console.error("❌ Erreur lors du chargement de poster.json :", err);
+  poster = {};
+}
+
 // --- Configuration Cloudinary ---
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
@@ -22,22 +39,27 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_SECRET
 });
 
-// --- Sauvegarder dans poster.json ---
+// --- Fonction de sauvegarde dans poster.json ---
 const savePosters = () => {
-  fs.writeFileSync("./poster.json", JSON.stringify(poster, null, 2), "utf-8");
+  try {
+    fs.writeFileSync(POSTER_FILE, JSON.stringify(poster, null, 2), "utf-8");
+    console.log("💾 Fichier poster.json sauvegardé avec succès !");
+  } catch (err) {
+    console.error("❌ Erreur lors de l'écriture de poster.json :", err);
+  }
 };
 
 // --- Fonction d'ajout de lien ---
 const addPosterLink = (username, film, link) => {
-  console.log(`Ajout du lien pour ${username} - ${film} : ${link}`);
-  
+  console.log(`🎬 Ajout du lien pour ${username} - ${film} : ${link}`);
+
   if (!poster[username]) {
     poster[username] = {};
   }
-  
+
   poster[username][film] = link;
   savePosters(); // ✅ Sauvegarde dans le fichier
-  return {"username":username, "film" : film, "url":link};
+  return { username, film, url: link };
 };
 
 // --- Route d'upload ---
@@ -50,13 +72,13 @@ app.post("/upload", upload.single("poster"), (req, res) => {
     { folder: "letterboxd-posters" },
     (error, result) => {
       if (error) {
-        console.error("Erreur Cloudinary :", error);
+        console.error("❌ Erreur Cloudinary :", error);
         return res.status(500).json({ error: error.message });
       }
 
       const { film, username } = req.body;
       const updatedPosters = addPosterLink(username, film, result.secure_url);
-      console.log("Poster uploadé avec succès :", updatedPosters);
+      console.log("✅ Poster uploadé avec succès :", updatedPosters);
       res.json(updatedPosters);
     }
   );
@@ -70,7 +92,8 @@ app.post("/link", (req, res) => {
   if (!link) return res.status(400).json({ error: "Aucun lien reçu" });
   if (!film) return res.status(400).json({ error: "Aucun nom de film reçu" });
   if (!username) return res.status(400).json({ error: "Aucun nom d'utilisateur reçu" });
-  console.log(`Ajout du lien direct pour ${username} - ${film} : ${link}`);
+
+  console.log(`🔗 Ajout du lien direct pour ${username} - ${film} : ${link}`);
   const updatedPosters = addPosterLink(username, film, link);
   res.json(updatedPosters);
 });
@@ -82,24 +105,24 @@ app.get("/:username", (req, res) => {
   res.json(userPosters);
 });
 
-// Route de suppression
+// --- Route de suppression ---
 app.post("/delete", (req, res) => {
   const { username, film } = req.body;
   if (!username || !film) {
     return res.status(400).json({ error: "Nom d'utilisateur ou nom de film manquant" });
   }
 
-  console.log(`Suppression du poster pour ${username} - ${film}`);
+  console.log(`🗑️ Suppression du poster pour ${username} - ${film}`);
 
   if (poster[username] && poster[username][film]) {
     delete poster[username][film];
     savePosters();
-    return res.json({ message: `Poster pour '${film}' supprimé pour l'utilisateur '${username}'` });
+    return res.json({ message: `Poster pour '${film}' supprimé pour '${username}'` });
   } else {
     return res.status(404).json({ error: "Poster non trouvé" });
   }
 });
 
-// --- Démarrage ---
+// --- Démarrage du serveur ---
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`🚀 Serveur lancé sur http://localhost:${port}`));
