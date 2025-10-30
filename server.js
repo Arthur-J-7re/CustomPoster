@@ -11,7 +11,7 @@ dotenv.config();
 const app = express();
 const upload = multer({ storage: multer.memoryStorage() });
 
-app.use(cors());
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 
 const POSTER_FILE = "./poster.json";
@@ -88,12 +88,14 @@ app.post("/upload", upload.single("poster"), (req, res) => {
 
 // --- Route d'ajout de lien direct ---
 app.post("/link", (req, res) => {
+  console.log("🟡 Requête reçue sur /link :", req.body);
   const { film, username, link } = req.body;
+
   if (!link) return res.status(400).json({ error: "Aucun lien reçu" });
   if (!film) return res.status(400).json({ error: "Aucun nom de film reçu" });
   if (!username) return res.status(400).json({ error: "Aucun nom d'utilisateur reçu" });
 
-  console.log(`🔗 Ajout du lien direct pour ${username} - ${film} : ${link}`);
+  console.log(`Ajout du lien direct pour ${username} - ${film} : ${link}`);
   const updatedPosters = addPosterLink(username, film, link);
   res.json(updatedPosters);
 });
