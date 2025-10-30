@@ -66,12 +66,11 @@ app.post("/upload", upload.single("poster"), (req, res) => {
 
 // --- Route d'ajout de lien direct ---
 app.post("/link", (req, res) => {
-  console.log(req);
   const { film, username, link } = req.body;
   if (!link) return res.status(400).json({ error: "Aucun lien reçu" });
   if (!film) return res.status(400).json({ error: "Aucun nom de film reçu" });
   if (!username) return res.status(400).json({ error: "Aucun nom d'utilisateur reçu" });
-
+  console.log(`Ajout du lien direct pour ${username} - ${film} : ${link}`);
   const updatedPosters = addPosterLink(username, film, link);
   res.json(updatedPosters);
 });
@@ -81,6 +80,24 @@ app.get("/:username", (req, res) => {
   const { username } = req.params;
   const userPosters = poster[username] || {};
   res.json(userPosters);
+});
+
+// Route de suppression
+app.post("/delete", (req, res) => {
+  const { username, film } = req.body;
+  if (!username || !film) {
+    return res.status(400).json({ error: "Nom d'utilisateur ou nom de film manquant" });
+  }
+
+  console.log(`Suppression du poster pour ${username} - ${film}`);
+
+  if (poster[username] && poster[username][film]) {
+    delete poster[username][film];
+    savePosters();
+    return res.json({ message: `Poster pour '${film}' supprimé pour l'utilisateur '${username}'` });
+  } else {
+    return res.status(404).json({ error: "Poster non trouvé" });
+  }
 });
 
 // --- Démarrage ---
