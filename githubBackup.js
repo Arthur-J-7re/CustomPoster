@@ -25,6 +25,9 @@ export const backupJSON = async () => {
     await repo.checkout(BRANCH);
     await repo.pull("origin", BRANCH);
 
+    await repo.addConfig("user.name", "Render Bot");
+    await repo.addConfig("user.email", "bot@render.com");
+
     // Copie du fichier JSON dans le repo
     fs.copyFileSync(FILE, `${TMP_DIR}/${FILE}`);
 

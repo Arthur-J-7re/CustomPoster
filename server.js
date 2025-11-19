@@ -15,8 +15,8 @@ const upload = multer({ storage: multer.memoryStorage() });
 app.use(cors({ origin: "*" }));
 app.use(express.json());
 
-const POSTER_FILE = "./poster.json";
 await restoreJSON();
+const POSTER_FILE = "./poster.json";
 
 // --- Lecture initiale du fichier JSON ---
 let poster = {};
