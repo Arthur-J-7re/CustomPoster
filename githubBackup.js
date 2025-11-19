@@ -1,7 +1,8 @@
 import simpleGit from "simple-git";
 import fs from "fs";
+import dotenv from "dotenv";
 
-const GITHUB_REPO = "https://github.com/Arthur-J-7re/CustomPosterJson.git";
+const GITHUB_REPO = `https://${process.env.GITHUB_TOKEN}@github.com/Arthur-J-7re/CustomPosterJson.git`;
 const BRANCH = "main";
 const FILE = "poster.json"; // nom du fichier dans le repo
 const TMP_DIR = "./tmp-backup";
