@@ -4,7 +4,7 @@ import { v2 as cloudinary } from "cloudinary";
 import dotenv from "dotenv";
 import cors from "cors";
 import streamifier from "streamifier";
-import { backupJSON, restoreJSON } from "./githubBackup";
+import {backupJSON, restoreJSON} from "./githubBackup.js";
 import fs from "fs";
 
 dotenv.config();
@@ -16,6 +16,7 @@ app.use(cors({ origin: "*" }));
 app.use(express.json());
 
 const POSTER_FILE = "./poster.json";
+await restoreJSON();
 
 // --- Lecture initiale du fichier JSON ---
 let poster = {};
