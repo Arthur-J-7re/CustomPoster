@@ -6,6 +6,7 @@
 		"express": "^5.1.0",
 		"fs": "0.0.1-security",
 		"multer": "^2.0.2",
+		"simple-git": "^3.30.0",
 		"streamifier": "^0.1.1"
 	},
 	"type": "module"

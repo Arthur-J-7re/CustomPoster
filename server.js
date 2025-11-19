@@ -4,6 +4,7 @@ import { v2 as cloudinary } from "cloudinary";
 import dotenv from "dotenv";
 import cors from "cors";
 import streamifier from "streamifier";
+import { backupJSON, restoreJSON } from "./githubBackup";
 import fs from "fs";
 
 dotenv.config();
@@ -40,10 +41,11 @@ cloudinary.config({
 });
 
 // --- Fonction de sauvegarde dans poster.json ---
-const savePosters = () => {
+const savePosters = async () => {
   try {
     fs.writeFileSync(POSTER_FILE, JSON.stringify(poster, null, 2), "utf-8");
     console.log("💾 Fichier poster.json sauvegardé avec succès !");
+    await backupJSON();
   } catch (err) {
     console.error("❌ Erreur lors de l'écriture de poster.json :", err);
   }
